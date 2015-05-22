@@ -1718,7 +1718,9 @@ setup_current_filesystem(struct archive_read_disk *a)
 }
 
 #elif defined(HAVE_SYS_STATFS_H) && defined(HAVE_LINUX_MAGIC_H) &&\
-	defined(HAVE_STATFS) && defined(HAVE_FSTATFS)
+	defined(HAVE_STATFS) && defined(HAVE_FSTATFS) &&\
+	defined(HAVE_SYS_STATVFS_H) &&\
+	(defined(HAVE_STATVFS) || defined(HAVE_FSTATVFS))
 /*
  * Note: statfs is deprecated since LSB 3.2
  */
