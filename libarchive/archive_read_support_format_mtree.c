@@ -57,6 +57,8 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_read_support_format_mtree.c 2011
 #include "archive_string.h"
 #include "archive_pack_dev.h"
 
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+
 #ifndef O_BINARY
 #define	O_BINARY 0
 #endif
@@ -2022,3 +2024,11 @@ readline(struct archive_read *a, struct mtree *mtree, char **start,
 		find_off = u - mtree->line.s;
 	}
 }
+
+#else
+int
+archive_read_support_format_mtree(struct archive *_a)
+{
+    return ARCHIVE_OK;
+}
+#endif

@@ -1312,7 +1312,7 @@ free_sconv_object(struct archive_string_conv *sc)
 	free(sc);
 }
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 static unsigned
 my_atoi(const char *p)
 {

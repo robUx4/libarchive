@@ -120,6 +120,7 @@ lrzip_bidder_bid(struct archive_read_filter_bidder *self,
 static int
 lrzip_bidder_init(struct archive_read_filter *self)
 {
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 	int r;
 
 	r = __archive_read_program(self, "lrzip -d -q");
@@ -129,4 +130,7 @@ lrzip_bidder_init(struct archive_read_filter *self)
 	self->code = ARCHIVE_FILTER_LRZIP;
 	self->name = "lrzip";
 	return (r);
+#else
+    return ARCHIVE_FATAL;
+#endif
 }

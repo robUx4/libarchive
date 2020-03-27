@@ -106,9 +106,11 @@
 #define	lseek		__la_lseek
 #define __LA_LSEEK_NEEDED
 #endif
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #define	lstat		__la_stat
 #define	open		__la_open
 #define	read		__la_read
+#endif
 #if !defined(__BORLANDC__) && !defined(__WATCOMC__)
 #define setmode		_setmode
 #endif
@@ -122,8 +124,10 @@
 #define	umask		_umask
 #endif
 #endif
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #define	waitpid		__la_waitpid
 #define	write		__la_write
+#endif
 
 #if !defined(__WATCOMC__)
 
@@ -276,8 +280,10 @@ extern int	 __la_stat(const char *path, struct stat *st);
 extern pid_t	 __la_waitpid(HANDLE child, int *status, int option);
 extern ssize_t	 __la_write(int fd, const void *buf, size_t nbytes);
 
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #define _stat64i32(path, st)	__la_stat(path, st)
 #define _stat64(path, st)	__la_stat(path, st)
+#endif
 /* for status returned by la_waitpid */
 #define WIFEXITED(sts)		((sts & 0x100) == 0)
 #define WEXITSTATUS(sts)	(sts & 0x0FF)

@@ -204,6 +204,7 @@ lz4_reader_bid(struct archive_read_filter_bidder *self,
 static int
 lz4_reader_init(struct archive_read_filter *self)
 {
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 	int r;
 
 	r = __archive_read_program(self, "lz4 -d -q");
@@ -213,6 +214,9 @@ lz4_reader_init(struct archive_read_filter *self)
 	self->code = ARCHIVE_FILTER_LZ4;
 	self->name = "lz4";
 	return (r);
+#else
+    return ARCHIVE_FATAL;
+#endif
 }
 
 

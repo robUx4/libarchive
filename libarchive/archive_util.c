@@ -209,7 +209,7 @@ __archive_errx(int retvalue, const char *msg)
  * Create a temporary file
  */
 #if defined(_WIN32) && !defined(__CYGWIN__)
-
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 /*
  * Do not use Windows tmpfile() function.
  * It will make a temporary file under the root directory
@@ -361,6 +361,13 @@ exit_tmpfile:
 	archive_wstring_free(&temp_name);
 	return (fd);
 }
+#else
+int
+__archive_mktemp(const char *tmpdir)
+{
+    return -1;
+}
+#endif
 
 #else
 

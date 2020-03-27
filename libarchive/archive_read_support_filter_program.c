@@ -82,6 +82,8 @@ archive_read_support_filter_program(struct archive *a, const char *cmd)
 	return (archive_read_support_filter_program_signature(a, cmd, NULL, 0));
 }
 
+ #if !defined(_WIN32) || WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+
 /*
  * The bidder object stores the command and the signature to watch for.
  * The 'inhibit' entry here is used to ensure that unchecked filters never
@@ -105,7 +107,7 @@ static int	program_bidder_free(struct archive_read_filter_bidder *);
  */
 struct program_filter {
 	struct archive_string description;
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 	HANDLE		 child;
 #else
 	pid_t		 child;
@@ -254,7 +256,7 @@ child_stop(struct archive_read_filter *self, struct program_filter *state)
 			state->waitpid_return
 			    = waitpid(state->child, &state->exit_status, 0);
 		} while (state->waitpid_return == -1 && errno == EINTR);
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 		CloseHandle(state->child);
 #endif
 		state->child = 0;
@@ -309,7 +311,7 @@ child_read(struct archive_read_filter *self, char *buf, size_t buf_len)
 	struct program_filter *state = self->data;
 	ssize_t ret, requested, avail;
 	const char *p;
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 	HANDLE handle = (HANDLE)_get_osfhandle(state->child_stdout);
 #endif
 
@@ -317,7 +319,7 @@ child_read(struct archive_read_filter *self, char *buf, size_t buf_len)
 
 	for (;;) {
 		do {
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 			/* Avoid infinity wait.
 			 * Note: If there is no data in the pipe, ReadFile()
 			 * called in read() never returns and so we won't
@@ -437,7 +439,7 @@ __archive_read_program(struct archive_read_filter *self, const char *cmd)
 		    cmd);
 		return (ARCHIVE_FATAL);
 	}
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 	state->child = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, child);
 	if (state->child == NULL) {
 		child_stop(self, state);
@@ -516,3 +518,5 @@ program_filter_close(struct archive_read_filter *self)
 
 	return (e);
 }
+
+#endif // !_WIN32 || WINAPI_PARTITION_DESKTOP

@@ -43,6 +43,7 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_check_magic.c 201089 2009-12-28 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
 #include <winbase.h>
+#include <winapifamily.h>
 #endif
 
 #include "archive_private.h"
@@ -65,7 +66,7 @@ errmsg(const char *m)
 static __LA_DEAD void
 diediedie(void)
 {
-#if defined(_WIN32) && !defined(__CYGWIN__) && defined(_DEBUG)
+#if defined(_WIN32) && !defined(__CYGWIN__) && defined(_DEBUG) && !WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_APP)
 	/* Cause a breakpoint exception  */
 	DebugBreak();
 #endif

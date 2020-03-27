@@ -754,6 +754,7 @@ xz_filter_close(struct archive_read_filter *self)
 static int
 lzma_bidder_init(struct archive_read_filter *self)
 {
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 	int r;
 
 	r = __archive_read_program(self, "lzma -d -qq");
@@ -763,11 +764,15 @@ lzma_bidder_init(struct archive_read_filter *self)
 	self->code = ARCHIVE_FILTER_LZMA;
 	self->name = "lzma";
 	return (r);
+#else
+    return ARCHIVE_FATAL;
+#endif
 }
 
 static int
 xz_bidder_init(struct archive_read_filter *self)
 {
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 	int r;
 
 	r = __archive_read_program(self, "xz -d -qq");
@@ -777,11 +782,15 @@ xz_bidder_init(struct archive_read_filter *self)
 	self->code = ARCHIVE_FILTER_XZ;
 	self->name = "xz";
 	return (r);
+#else
+    return ARCHIVE_FATAL;
+#endif
 }
 
 static int
 lzip_bidder_init(struct archive_read_filter *self)
 {
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 	int r;
 
 	r = __archive_read_program(self, "lzip -d -q");
@@ -791,6 +800,9 @@ lzip_bidder_init(struct archive_read_filter *self)
 	self->code = ARCHIVE_FILTER_LZIP;
 	self->name = "lzip";
 	return (r);
+#else
+    return ARCHIVE_FATAL;
+#endif
 }
 
 #endif /* HAVE_LZMA_H */

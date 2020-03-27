@@ -143,6 +143,7 @@ zstd_bidder_bid(struct archive_read_filter_bidder *self,
 static int
 zstd_bidder_init(struct archive_read_filter *self)
 {
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 	int r;
 
 	r = __archive_read_program(self, "zstd -d -qq");
@@ -152,6 +153,9 @@ zstd_bidder_init(struct archive_read_filter *self)
 	self->code = ARCHIVE_FILTER_ZSTD;
 	self->name = "zstd";
 	return (r);
+#else
+    return ARCHIVE_FATAL;
+#endif
 }
 
 #else
