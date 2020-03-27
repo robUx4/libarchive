@@ -295,7 +295,7 @@ AC_CHECK_HEADERS([sys/time.h sys/utime.h sys/utsname.h sys/vfs.h sys/xattr.h])
 AC_CHECK_HEADERS([time.h unistd.h utime.h wchar.h wctype.h])
 AC_CHECK_HEADERS([windows.h])
 # check windows.h first; the other headers require it.
-AC_CHECK_HEADERS([wincrypt.h winioctl.h],[],[],
+AC_CHECK_HEADERS([bcrypt.h winioctl.h],[],[],
 [[#ifdef HAVE_WINDOWS_H
 # include <windows.h>
 #endif
@@ -1066,7 +1066,7 @@ AC_DEFUN([CRYPTO_CHECK_WIN], [
     AC_LINK_IFELSE([AC_LANG_SOURCE([
 #define ARCHIVE_$1_COMPILE_TEST
 #include <windows.h>
-#include <wincrypt.h>
+#include <bcrypt.h>
 
 int
 main(int argc, char **argv)

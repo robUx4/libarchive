@@ -58,8 +58,8 @@ static void arc4random_buf(void *, size_t);
 #include "archive.h"
 #include "archive_random_private.h"
 
-#if defined(HAVE_WINCRYPT_H) && !defined(__CYGWIN__)
-#include <wincrypt.h>
+#if defined(HAVE_BCRYPT_H) && !defined(__CYGWIN__)
+#include <bcrypt.h>
 #endif
 
 #ifndef O_CLOEXEC
@@ -74,20 +74,14 @@ static void arc4random_buf(void *, size_t);
 int
 archive_random(void *buf, size_t nbytes)
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-	HCRYPTPROV hProv;
-	BOOL success;
-
-	success = CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL,
-	    CRYPT_VERIFYCONTEXT);
-	if (!success && GetLastError() == (DWORD)NTE_BAD_KEYSET) {
-		success = CryptAcquireContext(&hProv, NULL, NULL,
-		    PROV_RSA_FULL, CRYPT_NEWKEYSET);
-	}
-	if (success) {
-		success = CryptGenRandom(hProv, (DWORD)nbytes, (BYTE*)buf);
-		CryptReleaseContext(hProv, 0);
-		if (success)
+#if defined(HAVE_BCRYPT_H) && !defined(__CYGWIN__)
+	BCRYPT_ALG_HANDLE algo_handle;
+	NTSTATUS ret = BCryptOpenAlgorithmProvider(&algo_handle, BCRYPT_RNG_ALGORITHM,
+	                                           MS_PRIMITIVE_PROVIDER, 0);
+	if (BCRYPT_SUCCESS(ret)) {
+		ret = BCryptGenRandom(algo_handle, buf, nbytes, 0);
+		BCryptCloseAlgorithmProvider(algo_handle, 0);
+		if (BCRYPT_SUCCESS(ret))
 			return ARCHIVE_OK;
 	}
 	/* TODO: Does this case really happen? */

@@ -42,8 +42,8 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_util.c 201098 2009-12-28 02:58:1
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif
-#if defined(HAVE_WINCRYPT_H) && !defined(__CYGWIN__)
-#include <wincrypt.h>
+#if defined(HAVE_BCRYPT_H) && !defined(__CYGWIN__)
+#include <bcrypt.h>
 #endif
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
@@ -233,14 +233,14 @@ __archive_mktemp(const char *tmpdir)
 		L'm', L'n', L'o', L'p', L'q', L'r', L's', L't',
 		L'u', L'v', L'w', L'x', L'y', L'z'
 	};
-	HCRYPTPROV hProv;
+	BCRYPT_ALG_HANDLE algo_handle;
 	struct archive_wstring temp_name;
 	wchar_t *ws;
 	DWORD attr;
 	wchar_t *xp, *ep;
 	int fd;
 
-	hProv = (HCRYPTPROV)NULL;
+	algo_handle = NULL;
 	fd = -1;
 	ws = NULL;
 	archive_string_init(&temp_name);
@@ -302,8 +302,8 @@ __archive_mktemp(const char *tmpdir)
 	ep = temp_name.s + archive_strlen(&temp_name);
 	xp = ep - wcslen(suffix);
 
-	if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL,
-		CRYPT_VERIFYCONTEXT)) {
+	if (!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&algo_handle, BCRYPT_RNG_ALGORITHM,
+	                                           MS_PRIMITIVE_PROVIDER, 0))) {
 		la_dosmaperr(GetLastError());
 		goto exit_tmpfile;
 	}
@@ -314,8 +314,8 @@ __archive_mktemp(const char *tmpdir)
 
 		/* Generate a random file name through CryptGenRandom(). */
 		p = xp;
-		if (!CryptGenRandom(hProv, (DWORD)(ep - p)*sizeof(wchar_t),
-		    (BYTE*)p)) {
+		if (!BCRYPT_SUCCESS(BCryptGenRandom(algo_handle, p,
+		                                   (DWORD)(ep - p)*sizeof(wchar_t), 0))) {
 			la_dosmaperr(GetLastError());
 			goto exit_tmpfile;
 		}
@@ -355,8 +355,8 @@ __archive_mktemp(const char *tmpdir)
 			break;/* success! */
 	}
 exit_tmpfile:
-	if (hProv != (HCRYPTPROV)NULL)
-		CryptReleaseContext(hProv, 0);
+	if (algo_handle != (HCRYPTPROV)NULL)
+		BCryptCloseAlgorithmProvider(algo_handle, 0);
 	free(ws);
 	archive_wstring_free(&temp_name);
 	return (fd);
